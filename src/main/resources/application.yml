@@ -1,0 +1,17 @@
+spring:
+  threads:
+    virtual:
+      enabled: true
+
+csv-converter:
+  input-directory: ${user.dir}/data/input
+  output-directory: ${user.dir}/data/output
+  error-directory: ${user.dir}/data/error
+  processing-suffix: .processing
+  poll-interval-ms: 1000
+  max-messages-per-poll: 1
+
+logging:
+  level:
+    com.seglad.csvconverter: INFO
+    org.springframework.integration: INFO
