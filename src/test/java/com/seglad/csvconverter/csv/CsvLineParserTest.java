@@ -25,9 +25,23 @@ class CsvLineParserTest {
   }
 
   @Test
+  void parseLine_parsesPhoneRowWithoutLandline() {
+    assertThat(parser.parseLine("T|0701234567|"))
+        .contains(new ParsedRow.PhoneRow(new Phone("0701234567", null)));
+  }
+
+  @Test
   void parseLine_parsesAddressRow() {
     assertThat(parser.parseLine("A|Main St|London|SW1A1AA"))
         .contains(new ParsedRow.AddressRow(new Address("Main St", "London", "SW1A1AA")));
+  }
+
+  @Test
+  void parseLine_parsesAddressRowWithoutZip() {
+    assertThat(parser.parseLine("A|Main St|London"))
+        .contains(new ParsedRow.AddressRow(new Address("Main St", "London", null)));
+    assertThat(parser.parseLine("A|Main St|London|"))
+        .contains(new ParsedRow.AddressRow(new Address("Main St", "London", null)));
   }
 
   @Test

@@ -62,7 +62,9 @@ public class PersonXmlWriter {
         writer.write(indent(indent) + "<address>\n");
         writeElement(writer, "street", address.street(), indent + 2);
         writeElement(writer, "city", address.city(), indent + 2);
-        writeElement(writer, "zip", address.zip(), indent + 2);
+        if (address.zip() != null) {
+            writeElement(writer, "zip", address.zip(), indent + 2);
+        }
         writer.write(indent(indent) + "</address>\n");
     }
 

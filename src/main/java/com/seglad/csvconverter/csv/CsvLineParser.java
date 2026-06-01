@@ -49,25 +49,33 @@ public class CsvLineParser {
                     "Phone row must have exactly 3 pipe-separated fields (T|mobile|landline): " + line);
         }
         String mobile = fields[1].trim();
-        String landline = fields[2].trim();
         if (mobile.isEmpty()) {
             throw new IllegalArgumentException("Phone mobile must not be empty: " + line);
         }
-        return new ParsedRow.PhoneRow(new Phone(mobile, landline));
+        String landline = fields[2].trim();
+        String landlineOrNull = landline.isEmpty() ? null : landline;
+        return new ParsedRow.PhoneRow(new Phone(mobile, landlineOrNull));
     }
 
     private ParsedRow.AddressRow parseAddress(String[] fields, String line) {
-        if (fields.length != 4) {
+        if (fields.length < 3 || fields.length > 4) {
             throw new IllegalArgumentException(
-                    "Address row must have exactly 4 pipe-separated fields (A|street|city|zip): " + line);
+                    "Address row must have 3 or 4 pipe-separated fields (A|street|city or A|street|city|zip): "
+                            + line);
         }
         String street = fields[1].trim();
         String city = fields[2].trim();
-        String zip = fields[3].trim();
-        if (street.isEmpty() || city.isEmpty() || zip.isEmpty()) {
-            throw new IllegalArgumentException("Address street, city and zip must not be empty: " + line);
+        if (street.isEmpty() || city.isEmpty()) {
+            throw new IllegalArgumentException("Address street and city must not be empty: " + line);
         }
-        return new ParsedRow.AddressRow(new Address(street, city, zip));
+        String zipOrNull = null;
+        if (fields.length == 4) {
+            String zip = fields[3].trim();
+            if (!zip.isEmpty()) {
+                zipOrNull = zip;
+            }
+        }
+        return new ParsedRow.AddressRow(new Address(street, city, zipOrNull));
     }
 
     private ParsedRow.FamilyRow parseFamily(String[] fields, String line) {

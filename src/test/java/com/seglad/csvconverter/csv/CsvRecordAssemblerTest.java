@@ -40,7 +40,7 @@ class CsvRecordAssemblerTest {
 
     Person person = assembler.finish().getFirst();
     assertThat(person.family()).isNull();
-    assertThat(person.phone().mobile()).isEqualTo("0703");
+    assertThat(person.phone()).isEqualTo(new Phone("0703", null));
     assertThat(person.address().city()).isEqualTo("City");
   }
 

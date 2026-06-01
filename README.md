@@ -46,8 +46,8 @@ Input files use pipe-separated rows (despite the `.csv` extension). The first fi
 | Type | Row format | Attached to |
 |------|------------|-------------|
 | Person | `P\|firstname\|lastname` | Starts a new person block |
-| Phone | `T\|mobile\|landline` | Current person, or current family after `F` |
-| Address | `A\|street\|city\|zip` | Current person, or current family after `F` |
+| Phone | `T\|mobile\|landline` | Current person, or current family after `F`; landline may be empty |
+| Address | `A\|street\|city` or `A\|street\|city\|zip` | Current person, or current family after `F`; zip is optional |
 | Family | `F\|name\|born` | Current person (year of birth as integer) |
 
 ### Row order rules
