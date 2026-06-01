@@ -3,6 +3,7 @@ package com.seglad.csvconverter.csv;
 import com.seglad.csvconverter.model.Address;
 import com.seglad.csvconverter.model.Family;
 import com.seglad.csvconverter.model.Phone;
+import java.util.List;
 import java.util.Optional;
 import org.springframework.stereotype.Component;
 
@@ -90,7 +91,7 @@ public class CsvLineParser {
         }
         try {
             int born = Integer.parseInt(bornText);
-            return new ParsedRow.FamilyRow(new Family(name, born, null, null));
+            return new ParsedRow.FamilyRow(new Family(name, born, null, List.of()));
         } catch (NumberFormatException ex) {
             throw new IllegalArgumentException("Family born year must be a valid integer: " + line, ex);
         }

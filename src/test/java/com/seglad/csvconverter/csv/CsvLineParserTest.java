@@ -6,6 +6,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import com.seglad.csvconverter.model.Address;
 import com.seglad.csvconverter.model.Family;
 import com.seglad.csvconverter.model.Phone;
+import java.util.List;
 import org.junit.jupiter.api.Test;
 
 class CsvLineParserTest {
@@ -47,7 +48,7 @@ class CsvLineParserTest {
   @Test
   void parseLine_parsesFamilyRow() {
     assertThat(parser.parseLine("F|Smith|1990"))
-        .contains(new ParsedRow.FamilyRow(new Family("Smith", 1990, null, null)));
+        .contains(new ParsedRow.FamilyRow(new Family("Smith", 1990, null, List.of())));
   }
 
   @Test

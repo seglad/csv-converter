@@ -27,11 +27,11 @@ public class PersonXmlWriter {
         if (person.phone() != null) {
             writePhone(writer, person.phone(), 4);
         }
-        if (person.address() != null) {
-            writeAddress(writer, person.address(), 4);
+        for (Address address : person.addresses()) {
+            writeAddress(writer, address, 4);
         }
-        if (person.family() != null) {
-            writeFamily(writer, person.family(), 4);
+        for (Family family : person.families()) {
+            writeFamily(writer, family, 4);
         }
         writer.write("  </person>\n");
     }
@@ -43,8 +43,8 @@ public class PersonXmlWriter {
         if (family.phone() != null) {
             writePhone(writer, family.phone(), indent + 2);
         }
-        if (family.address() != null) {
-            writeAddress(writer, family.address(), indent + 2);
+        for (Address address : family.addresses()) {
+            writeAddress(writer, address, indent + 2);
         }
         writer.write(indent(indent) + "</family>\n");
     }

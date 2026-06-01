@@ -64,19 +64,8 @@ public class CsvRecordAssembler {
     private void handleAddress(Address address) {
         switch (context) {
             case AWAITING_PERSON -> throw invalidOrder("Address row (A) must follow a person (P)");
-            case PERSON_LEVEL -> {
-                if (currentPerson.address != null) {
-                    throw duplicate("address", "person");
-                }
-                currentPerson.address = address;
-            }
-            case FAMILY_LEVEL -> {
-                FamilyBuilder family = requireFamily();
-                if (family.address != null) {
-                    throw duplicate("address", "family");
-                }
-                family.address = address;
-            }
+            case PERSON_LEVEL -> currentPerson.addresses.add(address);
+            case FAMILY_LEVEL -> requireFamily().addresses.add(address);
         }
     }
 
@@ -84,18 +73,16 @@ public class CsvRecordAssembler {
         if (context == Context.AWAITING_PERSON) {
             throw invalidOrder("Family row (F) must follow a person (P)");
         }
-        if (currentPerson.family != null) {
-            throw new IllegalStateException("Person already has a family; duplicate F row is not allowed");
-        }
-        currentPerson.family = new FamilyBuilder(familyHeader.name(), familyHeader.born());
+        FamilyBuilder family = new FamilyBuilder(familyHeader.name(), familyHeader.born());
+        currentPerson.families.add(family);
         context = Context.FAMILY_LEVEL;
     }
 
     private FamilyBuilder requireFamily() {
-        if (currentPerson.family == null) {
+        if (currentPerson.families.isEmpty()) {
             throw new IllegalStateException("Family row (F) must appear before family phone or address rows");
         }
-        return currentPerson.family;
+        return currentPerson.families.getLast();
     }
 
     private void completeCurrentPerson() {
@@ -119,8 +106,8 @@ public class CsvRecordAssembler {
         private final String firstname;
         private final String lastname;
         private Phone phone;
-        private Address address;
-        private FamilyBuilder family;
+        private final List<Address> addresses = new ArrayList<>();
+        private final List<FamilyBuilder> families = new ArrayList<>();
 
         private PersonBuilder(String firstname, String lastname) {
             this.firstname = firstname;
@@ -128,8 +115,7 @@ public class CsvRecordAssembler {
         }
 
         private Person build() {
-            Family builtFamily = family != null ? family.build() : null;
-            return new Person(firstname, lastname, phone, address, builtFamily);
+            return new Person(firstname, lastname, phone, addresses, families.stream().map(FamilyBuilder::build).toList());
         }
     }
 
@@ -137,7 +123,7 @@ public class CsvRecordAssembler {
         private final String name;
         private final int born;
         private Phone phone;
-        private Address address;
+        private final List<Address> addresses = new ArrayList<>();
 
         private FamilyBuilder(String name, int born) {
             this.name = name;
@@ -145,7 +131,7 @@ public class CsvRecordAssembler {
         }
 
         private Family build() {
-            return new Family(name, born, phone, address);
+            return new Family(name, born, phone, addresses);
         }
     }
 }

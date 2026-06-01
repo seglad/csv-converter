@@ -5,9 +5,11 @@ import static org.assertj.core.api.Assertions.assertThat;
 import com.seglad.csvconverter.csv.CsvFileReader;
 import com.seglad.csvconverter.csv.CsvLineParser;
 import com.seglad.csvconverter.xml.PersonXmlWriter;
+import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
@@ -19,7 +21,7 @@ class DefaultCsvToXmlConverterTest {
       new DefaultCsvToXmlConverter(new CsvFileReader(new CsvLineParser()), new PersonXmlWriter());
 
   @Test
-  void convert_writesNestedPersonXml() throws Exception {
+  void convert_writesPersonXmlWithMultipleFamiliesAndAddresses() throws Exception {
     Path csv = tempDir.resolve("people.csv");
     Files.writeString(
         csv,
@@ -30,6 +32,7 @@ class DefaultCsvToXmlConverterTest {
         F|Lovelace|1815
         T|0702222222|08-222
         A|Family St|Oxford|22222
+        F|Byron|1788
         """,
         StandardCharsets.UTF_8);
 
@@ -42,6 +45,8 @@ class DefaultCsvToXmlConverterTest {
     assertThat(xml).contains("<born>1815</born>");
     assertThat(xml).contains("<mobile>0702222222</mobile>");
     assertThat(xml).contains("<street>Family St</street>");
+    assertThat(xml).contains("<name>Byron</name>");
+    assertThat(xml).contains("<born>1788</born>");
   }
 
   @Test
@@ -51,5 +56,23 @@ class DefaultCsvToXmlConverterTest {
 
     String xml = Files.readString(converter.convert(csv), StandardCharsets.UTF_8);
     assertThat(xml).contains("<lastname>O&apos;Brien</lastname>");
+  }
+
+  @Test
+  void convert_mockCsvFile_printsXmlAndDoesNotThrow() throws Exception {
+    Path csv = tempDir.resolve("mock-people.csv");
+    try (InputStream input = getClass().getResourceAsStream("/mock-people.csv")) {
+      assertThat(input).as("mock CSV test resource").isNotNull();
+      Files.copy(input, csv);
+    }
+
+    Path xmlFile = Assertions.assertDoesNotThrow(() -> converter.convert(csv));
+    String xml = Files.readString(xmlFile, StandardCharsets.UTF_8);
+
+    System.out.println(xml);
+
+    assertThat(xml).contains("<people>");
+    assertThat(xml).contains("<firstname>Carl Gustaf</firstname>");
+    assertThat(xml).contains("<family>");
   }
 }

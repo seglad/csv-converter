@@ -1,3 +1,10 @@
 package com.seglad.csvconverter.model;
 
-public record Family(String name, int born, Phone phone, Address address) {}
+import java.util.List;
+
+public record Family(String name, int born, Phone phone, List<Address> addresses) {
+
+    public Family {
+        addresses = List.copyOf(addresses);
+    }
+}

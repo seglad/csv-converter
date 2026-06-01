@@ -52,13 +52,14 @@ Input files use pipe-separated rows (despite the `.csv` extension). The first fi
 
 ### Row order rules
 
-Rows are processed top to bottom. Child rows apply to the **current person** until a `F` row appears; after `F`, `T` and `A` rows apply to that **family** instead.
+Rows are processed top to bottom. Each `P` row starts a new person block. Child rows apply to the current person until an `F` row appears; after `F`, `T` and `A` rows apply to that current family until the next `F` or `P`.
 
 - A file must contain at least one `P` row.
 - `T`, `A`, and `F` must follow a `P` row (not appear before the first person).
-- After `P`, you may add person-level `T`, `A`, and/or `F` in any order (before the next `P`).
-- After `F`, only `T` and `A` are allowed (for the family), until the next `P`.
-- Duplicate `T`, `A`, or `F` for the same person or family is rejected.
+- After `P`, person-level `T`, `A`, and/or `F` rows may appear before the next `P`.
+- After `F`, family-level `T` and `A` rows may appear before the next `F` or `P`.
+- Each person may have one `T` row.
+- Each person may have multiple `A` and `F` rows, and each family may have multiple `A` rows.
 
 Example:
 
@@ -69,6 +70,7 @@ A|Person St|London|11111
 F|Lovelace|1815
 T|0702222222|08-222222
 A|Family St|Oxford|22222
+F|Byron|1788
 P|Grace|Hopper
 ```
 
