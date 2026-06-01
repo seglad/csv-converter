@@ -19,6 +19,21 @@ mvn spring-boot:run
 
 On startup, `data/input`, `data/output`, and `data/error` are created under the project directory (if missing). Drop `.csv` files into `data/input`; converted `.xml` files appear in `data/output`.
 
+To run the executable JAR from the project root:
+
+```bash
+java -jar ./csv-converter-0.0.1-SNAPSHOT.jar
+```
+
+Or build a fresh JAR with Maven and run it from `target`:
+
+```bash
+mvn clean package
+java -jar target/csv-converter-0.0.1-SNAPSHOT.jar
+```
+
+Stop the running app with `Ctrl+C`.
+
 ## Test
 
 ```bash
@@ -75,3 +90,7 @@ P|Grace|Hopper
 ```
 
 Invalid files are moved to `data/error`.
+
+## Processing notes
+
+During one app run, Spring Integration remembers accepted input files so the same file is not processed repeatedly. If you delete the output and copy another file with the same name into `data/input`, restart the app or use a different filename to process it again.

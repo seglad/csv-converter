@@ -1,4 +1,6 @@
 spring:
+  main:
+    keep-alive: true
   threads:
     virtual:
       enabled: true
