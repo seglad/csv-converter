@@ -4,77 +4,64 @@ import com.seglad.csvconverter.model.Address;
 import com.seglad.csvconverter.model.Family;
 import com.seglad.csvconverter.model.Person;
 import com.seglad.csvconverter.model.Phone;
+import jakarta.xml.bind.JAXBContext;
+import jakarta.xml.bind.JAXBException;
+import jakarta.xml.bind.Marshaller;
 import java.io.IOException;
 import java.io.Writer;
+import java.util.stream.StreamSupport;
 import org.springframework.stereotype.Component;
 
 @Component
 public class PersonXmlWriter {
 
+    private final JAXBContext jaxbContext;
+
+    public PersonXmlWriter() {
+        try {
+            this.jaxbContext = JAXBContext.newInstance(PeopleXml.class);
+        } catch (JAXBException ex) {
+            throw new IllegalStateException("Failed to initialize XML mapper", ex);
+        }
+    }
+
     public void writeDocument(Writer writer, Iterable<Person> people) throws IOException {
-        writer.write("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
-        writer.write("<people>\n");
-        for (Person person : people) {
-            writePerson(writer, person);
+        try {
+            Marshaller marshaller = jaxbContext.createMarshaller();
+            marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
+            marshaller.marshal(toXml(people), writer);
+        } catch (JAXBException ex) {
+            throw new IOException("Failed to write people XML", ex);
         }
-        writer.write("</people>\n");
     }
 
-    private void writePerson(Writer writer, Person person) throws IOException {
-        writer.write("  <person>\n");
-        writeElement(writer, "firstname", person.firstname(), 4);
-        writeElement(writer, "lastname", person.lastname(), 4);
-        if (person.phone() != null) {
-            writePhone(writer, person.phone(), 4);
-        }
-        for (Address address : person.addresses()) {
-            writeAddress(writer, address, 4);
-        }
-        for (Family family : person.families()) {
-            writeFamily(writer, family, 4);
-        }
-        writer.write("  </person>\n");
+    private PeopleXml toXml(Iterable<Person> people) {
+        return new PeopleXml(
+                StreamSupport.stream(people.spliterator(), false).map(this::toXml).toList());
     }
 
-    private void writeFamily(Writer writer, Family family, int indent) throws IOException {
-        writer.write(indent(indent) + "<family>\n");
-        writeElement(writer, "name", family.name(), indent + 2);
-        writeElement(writer, "born", String.valueOf(family.born()), indent + 2);
-        if (family.phone() != null) {
-            writePhone(writer, family.phone(), indent + 2);
-        }
-        for (Address address : family.addresses()) {
-            writeAddress(writer, address, indent + 2);
-        }
-        writer.write(indent(indent) + "</family>\n");
+    private PersonXml toXml(Person person) {
+        return new PersonXml(
+                person.firstname(),
+                person.lastname(),
+                toXml(person.phone()),
+                person.addresses().stream().map(this::toXml).toList(),
+                person.families().stream().map(this::toXml).toList());
     }
 
-    private void writePhone(Writer writer, Phone phone, int indent) throws IOException {
-        writer.write(indent(indent) + "<phone>\n");
-        writeElement(writer, "mobile", phone.mobile(), indent + 2);
-        if (phone.landline() != null && !phone.landline().isBlank()) {
-            writeElement(writer, "landline", phone.landline(), indent + 2);
-        }
-        writer.write(indent(indent) + "</phone>\n");
+    private FamilyXml toXml(Family family) {
+        return new FamilyXml(
+                family.name(),
+                family.born(),
+                toXml(family.phone()),
+                family.addresses().stream().map(this::toXml).toList());
     }
 
-    private void writeAddress(Writer writer, Address address, int indent) throws IOException {
-        writer.write(indent(indent) + "<address>\n");
-        writeElement(writer, "street", address.street(), indent + 2);
-        writeElement(writer, "city", address.city(), indent + 2);
-        if (address.zip() != null) {
-            writeElement(writer, "zip", address.zip(), indent + 2);
-        }
-        writer.write(indent(indent) + "</address>\n");
+    private PhoneXml toXml(Phone phone) {
+        return phone == null ? null : new PhoneXml(phone.mobile(), phone.landline());
     }
 
-    private void writeElement(Writer writer, String name, String value, int indent) throws IOException {
-        writer.write(indent(indent) + "<" + name + ">");
-        writer.write(XmlEscaper.escape(value));
-        writer.write("</" + name + ">\n");
-    }
-
-    private static String indent(int spaces) {
-        return " ".repeat(spaces);
+    private AddressXml toXml(Address address) {
+        return new AddressXml(address.street(), address.city(), address.zip());
     }
 }

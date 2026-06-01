@@ -52,10 +52,11 @@ class DefaultCsvToXmlConverterTest {
   @Test
   void convert_escapesXmlInNames() throws Exception {
     Path csv = tempDir.resolve("people.csv");
-    Files.writeString(csv, "P|Tom|O'Brien\n", StandardCharsets.UTF_8);
+    Files.writeString(csv, "P|Tom & Jerry|O<Brien\n", StandardCharsets.UTF_8);
 
     String xml = Files.readString(converter.convert(csv), StandardCharsets.UTF_8);
-    assertThat(xml).contains("<lastname>O&apos;Brien</lastname>");
+    assertThat(xml).contains("<firstname>Tom &amp; Jerry</firstname>");
+    assertThat(xml).contains("<lastname>O&lt;Brien</lastname>");
   }
 
   @Test
